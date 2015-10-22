@@ -1,0 +1,29 @@
+{
+  "name": "facebook-timeline",
+  "version": "1.0.0",
+  "keywords": [
+    "polymer",
+    "web-components",
+    "facebook",
+    "timeline",
+    "facebook-timeline"
+  ],
+  "main": "facebook-timeline.html",
+  "dependencies": {
+
+  },
+  "authors": [
+    "Miguel Ortega Moreno <miguel.ortega.moreno5@gmail.com>"
+  ],
+  "description": "Polymer component which show a facebook timeline",
+  "moduleType": [],
+  "license": "MIT",
+  "homepage": "https://github.com/Mortega5/facebook-timeline",
+  "ignore": [
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "*.*~"
+  ]
+}
