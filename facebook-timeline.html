@@ -46,15 +46,15 @@
         margin:15px 8px;
       }
       .post {
-        height: 100px;
+        min-height: 100px;
         padding: 8px;
         border-radius: 3px;
         background-color:white;
       }
       #logo {
         margin:8px;
-        width: 40px;
-        height: 40px;
+        min-width: 40px;
+        min-height: 40px;
       }
       .postHeader {
       }
@@ -85,6 +85,10 @@
         border-bottom: 1px solid #e6e6e6;
         padding-bottom: 8px;
 
+      }
+      .photo_publised {
+        max-width: 300px;
+        /*max-height: 30px;*/
       }
     </style>
     <iron-ajax
@@ -120,13 +124,17 @@
               <div class="horizontal layout postHeader">
                 <iron-icon id="logo" src="{{_getUserPicture(item)}}"></iron-icon>
                 <div class="vertical layout postInfo">
-                  <div id="username"><a href="http://facebook.es">{{_getAuthorPost(item)}}</a></div>
+                  <div id="username"><a href="http://facebook.es" target="_blank">{{_getAuthorPost(item)}}</a></div>
                   <div>{{item.time}}</div>
                 </div>
               </div>
               <div class="postContent">
-                <div>{{item.content}}</div>
-              </div>
+                <template is="dom-if" if="{{_isPhotho(item,'added_photos')}}">
+                  <div>
+                    <a href="{{item.linked.link}}" target="_blank"><img class="photo_publised" src="{{_getFullPhoto(item)}}"></img></a>
+                  </div>
+                </template>
+            </div>
             </div>
           </paper-material>
         </template>
@@ -135,141 +143,151 @@
 
   </template>
 
-  <script>
-    Polymer({
-      is: "facebook-timeline",
-      properties: {
-        events: {
-          type: Array,
-          value: []
-        },
-        language: {
-          type:String,
-          value: "es",
-          observer: "_languageUpdate"
-        },
-        languageUrl: {
-          type:String,
-          computed: "_getLanguageUrl(idiom)"
-        }
+<script>
+  Polymer({
+    is: "facebook-timeline",
+    properties: {
+      events: {
+        type: Array,
+        value: []
       },
-      ready: function(){
+      language: {
+        type:String,
+        value: "es",
+        observer: "_languageUpdate"
+      },
+      languageUrl: {
+        type:String,
+        computed: "_getLanguageUrl(idiom)"
+      }
+    },
+    ready: function(){
+      this.$.requestLanguage.generateRequest();
+    },
+
+    /* Observer and computed properties*/
+    _languageUpdate: function(newValue){
+      if(newValue === "en"){
+        this.language = "en";
+        this.idiom = "en_en.json"
         this.$.requestLanguage.generateRequest();
-      },
+      }
+      else if(newValue === "es"){
+        this.language = "es";
+        this.idiom = "es_es.json"
+        this.$.requestLanguage.generateRequest();
+      }
+    },
+    _getLanguageUrl:function(idiom){
+      return "language/" + idiom;
+    },
 
-      /* Observer and computed properties*/
-      _languageUpdate: function(newValue){
-        if(newValue === "en"){
-          this.language = "en";
-          this.idiom = "en_en.json"
-          this.$.requestLanguage.generateRequest();
-        }
-        else if(newValue === "es"){
-          this.language = "es";
-          this.idiom = "es_es.json"
-          this.$.requestLanguage.generateRequest();
-        }
-      },
-      _getLanguageUrl:function(idiom){
-        return "language/" + idiom;
-      },
+    /* Auxiliar function for parse data */
+    _existShare: function(actions){
+      var exist = false;
+      for (j=0;j<actions.length && !exist;j++){
+        if (actions[j].name == "Share")
+          exist = true;
+      }
+      return exist;
+    },
+    _calculateShared: function(item) {
+      return item.story;
+    },
+    _getShareInformation: function(item) {
+      var tag = "<a style='color:rgb(59, 89, 152);text-decoration:none;font-weight:bold' href='https://www.facebook.com/app_scoped_user_id/" + item.from.id + "' target='_blank'>"
+      tag+=item.from.name + " </a>" + item.story.replace(item.from.name+ " ", "");
+      return tag;
+    },
+    _getUserPicture: function(item) {
+      var link = "https://graph.facebook.com/";
+      link += item.linked? item.linked.from.id : item.from.id
+      link +="/picture";
+      return  link;
+    },
+    _getAuthorPost: function(item) {
+      return item.linked? item.linked.from.name : item.from.name;
+    },
+    _isPhotho: function(item, type) {
+      show = false;
+      if (item.linked){
+        show = item.linked.status_type === type;
+      }
+      return show;
+    },
+    _getFullPhoto: function(item) {
+      return "https://graph.facebook.com/" + item.linked.object_id + "/picture";
+    },
 
-      /* Auxiliar function for parse data */
-      _existShare: function(actions){
-        var exist = false;
-        for (i=0;i<actions.length && !exist;i++){
-          if (actions[i].name == "Share")
-            exist = true;
-        }
-        return exist;
-      },
-      _calculateShared: function(item) {
-        return item.story;
-      },
-      _getShareInformation: function(item) {
-        var tag = "<a style='color:rgb(59, 89, 152);text-decoration:none;font-weight:bold' href='https://www.facebook.com/app_scoped_user_id/" + item.from.id + "'>"
-        tag+=item.from.name + " </a>" + item.story.replace(item.from.name+ " ", "");
-        return tag;
-      },
-      _getUserPicture: function(item) {
-        var link = "https://graph.facebook.com/";
-        link += item.linked? item.linked.from.id : item.from.id
-        link +="/picture";
-        return  link;
-      },
-      _getAuthorPost: function(item) {
-        return item.linked? item.linked.from.name : item.from.name;
-      },
+    // Private functions
+    _language_response: function(event, detail){
+      this.data = detail.response;
+      this.$.requestData.generateRequest();
+    },
+    _dataResponse: function(event, detail){
+      this.set("events", detail.response.data);
+      this._reParserLinked(this.events);
+      this._changeTime(this.events);
+    },
+    _changeTime: function(list){
+      for (i=0;i<list.length;i++){
+        var date = new Date(list[i].updated_time);
+        var current_date = new Date();
+        var time;
+        /* Años*/
+        if ((current_date.getFullYear() - date.getFullYear()) != 0) {
+          var dif = current_date.getFullYear() - date.getFullYear()
+          time = dif==1 ? dif + " " + this.data.year : dif + " " + this.data.years;
+          /* Meses */
+        } else if ((current_date.getMonth() - date.getMonth()) != 0) { 
+          var dif = current_date.getMonth() - date.getMonth();
+          time = dif==1 ? dif + " " + this.data.month : dif + " " + this.data.months;
+          /* Dias */
+        } else if((current_date.getDate() - date.getDate()) == 0 ){
+          if((current_date.getHours() - date.getHours()) == 0 ){
+            if( (current_date.getMinutes() - date.getMinutes()) == 0 ){
 
-      // Private functions
-      _language_response: function(event, detail){
-        this.data = detail.response;
-        this.$.requestData.generateRequest();
-      },
-      _dataResponse: function(event, detail){
-        this.set("events", detail.response.data);
-        this._reParserLinked(this.events);
-        this._changeTime(this.events);
-      },
-      _changeTime: function(list){
-        for (i=0;i<list.length;i++){
-          var date = new Date(list[i].updated_time);
-          var current_date = new Date();
-          var time;
-          /* Años*/
-          if ((current_date.getFullYear() - date.getFullYear()) != 0) {
-            var dif = current_date.getFullYear() - date.getFullYear()
-            time = dif==1 ? dif + " " + this.data.year : dif + " " + this.data.years;
-            /* Meses */
-          } else if ((current_date.getMonth() - date.getMonth()) != 0) { 
-            var dif = current_date.getMonth() - date.getMonth();
-            time = dif==1 ? dif + " " + this.data.month : dif + " " + this.data.months;
-            /* Dias */
-          } else if((current_date.getDate() - date.getDate()) == 0 ){
-            if((current_date.getHours() - date.getHours()) == 0 ){
-              if( (current_date.getMinutes() - date.getMinutes()) == 0 ){
-
-                time = current_date.getSeconds() - date.getSeconds()+" "+this.data.seconds
-              }
-              else{
-                time = current_date.getMinutes() - date.getMinutes()+" "+this.data.minutes
-              }
+              time = current_date.getSeconds() - date.getSeconds()+" "+this.data.seconds
             }
             else{
-              if (current_date.getHours() - date.getHours() == 1) {
-                time = current_date.getHours() - date.getHours()+" "+this.data.hour;
-              }else {
-                time = current_date.getHours() - date.getHours()+" "+this.data.hours;
-              }
-            }
-          }
-          else if( ((current_date.getDate() - date.getDate()) < 15) && ( (current_date.getDate() - date.getDate()) > 0)){
-            if( (current_date.getDate() - date.getDate()) == 1){
-              time = current_date.getDate() - date.getDate()+" "+ this.data.day
-            }
-            else{
-              time = current_date.getDate() - date.getDate()+" "+this.data.days
+              time = current_date.getMinutes() - date.getMinutes()+" "+this.data.minutes
             }
           }
           else{
-            var month = [this.data.january,this.data.february,this.data.march,this.data.april, this.data.may,this.data.june,this.data.july,this.data.august,this.data.september,this.data.october,this.data.november,this.data.december];
-            time = date.getDate()+" "+this.data.of+" "+month[date.getMonth()]+" "+this.data.of+" "+date.getFullYear();
-
+            if (current_date.getHours() - date.getHours() == 1) {
+              time = current_date.getHours() - date.getHours()+" "+this.data.hour;
+            }else {
+              time = current_date.getHours() - date.getHours()+" "+this.data.hours;
+            }
           }
-          this.set("events." + i + ".time", time);
+        }
+        else if( ((current_date.getDate() - date.getDate()) < 15) && ( (current_date.getDate() - date.getDate()) > 0)){
+          if( (current_date.getDate() - date.getDate()) == 1){
+            time = current_date.getDate() - date.getDate()+" "+ this.data.day
+          }
+          else{
+            time = current_date.getDate() - date.getDate()+" "+this.data.days
+          }
+        }
+        else{
+          var month = [this.data.january,this.data.february,this.data.march,this.data.april, this.data.may,this.data.june,this.data.july,this.data.august,this.data.september,this.data.october,this.data.november,this.data.december];
+          time = date.getDate()+" "+this.data.of+" "+month[date.getMonth()]+" "+this.data.of+" "+date.getFullYear();
 
         }
-      },
-      _reParserLinked: function(list) {
-        for (i=0;i<list.length;i++){
-          if (list[i].actions && this._existShare(list[i].actions)) {
-            this.set("events." + i + ".linked", list[i+1])
-            this.splice("events", i+1, 1)
-          }
+        this.set("events." + i + ".time", time);
+
+      }
+    },
+    _reParserLinked: function(list) {
+      for (i=0;i<list.length;i++){
+        if (list[i].actions && this._existShare(list[i].actions)) {
+          this.set("events." + i + ".linked", list[i+1])
+          this.splice("events", i+1, 1)
         }
       }
+    }
 
-    });
-  </script>
+  });
+</script>
 
 </dom-module>
