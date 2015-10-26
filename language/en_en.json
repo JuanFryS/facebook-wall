@@ -24,5 +24,9 @@
   "october" : "October",
   "november" : "November",
   "december" : "December",
-  "of" : "of"
+  "of" : "of",
+  "with": "with",
+  "and": "and",
+  "others": "others",
+  "other": "other"
 }

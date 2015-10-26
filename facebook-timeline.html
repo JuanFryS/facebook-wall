@@ -75,6 +75,7 @@
       .postContent {
         border-top: 1px solid #e6e6e6;
         padding-top: 8px;
+        font-size: 14px;
       }
       a {
         text-decoration: none;
@@ -89,6 +90,15 @@
       .photo_publised {
         max-width: 300px;
         /*max-height: 30px;*/
+      }
+      .postLikes > p {
+        font-size: 12px;
+        margin: auto 3px;
+      }
+      .postLikes > iron-icon {
+        width: 18px;
+        height: 18px;
+        margin: auto 3px;
       }
     </style>
     <iron-ajax
@@ -129,11 +139,29 @@
                 </div>
               </div>
               <div class="postContent">
-                <template is="dom-if" if="{{_isPhotho(item,'added_photos')}}">
+                <!-- Added photos case -->
+                <template is="dom-if" if="{{_isType(item,'added_photos')}}">
                   <div>
                     <a href="{{item.linked.link}}" target="_blank"><img class="photo_publised" src="{{_getFullPhoto(item)}}"></img></a>
                   </div>
+                <div>
+                  <p inner-h-t-m-l="{{_parseText(item.description)}}"></p>
+                  <p inner-h-t-m-l="{{_getWith(item.linked)}}"></p>
+                </div>
                 </template>
+              <!-- mobile_status_update case -->
+              <template is="dom-if" if="{{_isType(item, 'shared_story')}}">
+                <p inner-h-t-m-l="{{_parseText(item.description)}}"></p>
+                <p inner-h-t-m-l="{{_getWith(item.linked)}}"></p>
+              </template>
+            </div>
+            <div class="postLikes horizontal layout">
+              <template is="dom-if" if="{{item.likes.data.length}}">
+                <iron-icon src="like.png"></iron-icon>
+                <p>{{item.likes.data.length}}</p>
+              </template>
+              <div><iron-icon></iron-icon></div>
+              <div><iron-icon></iron-icon></div>
             </div>
             </div>
           </paper-material>
@@ -153,12 +181,16 @@
       },
       language: {
         type:String,
-        value: "es",
+        value: "en",
         observer: "_languageUpdate"
       },
       languageUrl: {
         type:String,
         computed: "_getLanguageUrl(idiom)"
+      },
+      access_token: {
+        type: String,
+        value:"CAANMUmJPs2UBAApF3NhLix1XZAFWtit5GlA6ZCHDyG84nEHRJRmzWr5EOYdbl0Rl3c2venvrldGkKLmd68MHapUA98FIjkptUxzO8gwC54EmsebOZAW6G34Oo5RgsZAHpkAFqatbphbsY2qdSCNNdsvVhO7HfzLU7yKBlLuf1RED9ZAI5jNoyJyGDdCvm2bTLvZAqulAoRSGvVzQXhlvI8"
       }
     },
     ready: function(){
@@ -195,20 +227,19 @@
       return item.story;
     },
     _getShareInformation: function(item) {
-      var tag = "<a style='color:rgb(59, 89, 152);text-decoration:none;font-weight:bold' href='https://www.facebook.com/app_scoped_user_id/" + item.from.id + "' target='_blank'>"
-      tag+=item.from.name + " </a>" + item.story.replace(item.from.name+ " ", "");
+      var tag = this._parserUser(item.from) + item.story.replace(item.from.name+ " ", "");
       return tag;
     },
     _getUserPicture: function(item) {
       var link = "https://graph.facebook.com/";
       link += item.linked? item.linked.from.id : item.from.id
-      link +="/picture";
+      link +="/picture/?access_token=" + this.access_token;
       return  link;
     },
     _getAuthorPost: function(item) {
       return item.linked? item.linked.from.name : item.from.name;
     },
-    _isPhotho: function(item, type) {
+    _isType: function(item, type) {
       show = false;
       if (item.linked){
         show = item.linked.status_type === type;
@@ -216,9 +247,20 @@
       return show;
     },
     _getFullPhoto: function(item) {
-      return "https://graph.facebook.com/" + item.linked.object_id + "/picture";
+      return "https://graph.facebook.com/" + item.linked.object_id + "/picture?access_token=" + this.access_token;
     },
-
+    _getWith: function(item) {
+      var html = "";
+        if (item && item.with_tags && item.with_tags.data.length > 0) {
+          html += "-" + this.data.with + " " + this._parserUser(item.with_tags.data[0]) + " ";
+          if (item.with_tags.data.length > 1) {
+            var size = item.with_tags.data.length-1;
+            html += this.data.and + " " + size + " ";
+            html += item.with_tags.data.length >2 ? this.data.others: this.data.other
+          }
+        }
+      return html;
+    },
     // Private functions
     _language_response: function(event, detail){
       this.data = detail.response;
@@ -285,7 +327,30 @@
           this.splice("events", i+1, 1)
         }
       }
-    }
+    },
+    _parserUser: function(user) {
+      var tag = "<a style='color:rgb(59, 89, 152);text-decoration:none;font-weight:bold' href='https://www.facebook.com/app_scoped_user_id/" + user.id + "' target='_blank'>" + user.name + " </a>";
+      return tag;
+    },
+    _parseText: function(text) {
+      if (text) {
+        text = this._parseURL(text);
+        text = this._parseHashtag(text);
+      }
+      return text? text : "";
+    },
+    _parseURL: function(tweet) {
+      return tweet.replace(/[^"](?:http|https)+:\/\/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&~\?\/.=#]+/g, function(url) {
+        url = url.replace("#", "%23");
+        return '<a style="color:rgb(59, 89, 152)" href='+url+' target="_blank">'+url+'</a>'
+      })
+    },
+    _parseHashtag: function(tweet) {
+      return tweet.replace(/[#]+[A-Za-z0-9-_ñáéíóúàèìòùç]+/g, function(t) {
+        var tag = t.replace("#","")
+        return '<a style="color:rgb(59, 89, 152)" href="https://twitter.com/hashtag/'+tag+' "target="_blank">#'+tag+'</a>'
+      });
+    },
 
   });
 </script>
