@@ -10,7 +10,7 @@
   ],
   "main": "facebook-timeline.html",
   "dependencies": {
-    "iron-ajax": "PolymerElements/iron-ajax#~1.0.6",
+    "iron-ajax": "PolymerElements/iron-ajax#~1.0.7",
     "paper-header-panel": "PolymerElements/paper-header-panel#~1.0.5",
     "paper-styles": "PolymerElements/paper-styles#~1.0.12",
     "iron-icon": "PolymerElements/iron-icon#~1.0.7",
