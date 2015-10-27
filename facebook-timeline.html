@@ -12,7 +12,6 @@
     <style is="custom-style">
       :host {
         font-family: helvetica, arial, sans-serif;
-
       }
       paper-header-panel {
         min-width: 300px;
@@ -119,10 +118,17 @@
         font-size: 8px;
         color: #9197a3;
       }
+      .sharedStory {
+        margin: 10px 3px;
+        font-size: 10px;
+      }
+      .singlePostMessage {
+        white-space: pre;
+      }
     </style>
     <iron-ajax
                id="requestData"
-               url="mockData.json"
+               url="mockData2.json"
                method="GET"
                handleAs="json"
                on-response="_dataResponse"
@@ -172,8 +178,8 @@
                       </a>
                     </div>
                     <div>
+                      <p class="sharedStory">{{item.linked.story}}</p>
                       <p inner-h-t-m-l="{{_parseText(item.description)}}"></p>
-                      <p inner-h-t-m-l="{{_getWith(item.linked)}}"></p>
                     </div>
                   </template>
                   <!-- mobile_status_update case -->
@@ -185,7 +191,7 @@
 
                 <!-- Single Post-->
                 <template is="dom-if" if="{{_noStory(item)}}">
-                  <p>{{item.message}}</p>
+                  <p inner-h-t-m-l={{item.message}}></p>
                   <template is="dom-if" if="{{_isType(item, 'shared_story')}}">
                     <div class="nestedPost">
                       <img class="photo-source" src="{{_getShareImg(item)}}">
@@ -240,7 +246,7 @@
         },
         access_token: {
           type: String,
-          value:"CAACEdEose0cBAPnQLwyZBHs3f3C913Ec9WkbIhck1rEYxY1EBZAMVgpPOZBY9eFNlO4APHOICitIx2iBaZBxWrHaVE2zXRVnnCBA4AfhtmzcyRG1s3QkcTaG7HiiZBuJKcAZBUnmBsr9yERpkeZAJ7geXwmi5ZAZCZC0oszwFpro8E7TUBLK7V1VCKNR898JIvOVv2OYEXbhVsaj1JVwC6ZBO3K"
+          value:"CAACEdEose0cBANsyeCCx0ZBGMAvvBBTlrZAMFQ0i0AbZAMnTnYvGyEjvZCBvmD0r8GgFTzfUbIEP1NPgz2vtQavUiNxx3puHKZAhcNInGS6EeWiRlcZBp17lrcQvBuUPcTyHX8yPF5r1oa2rNE2ZCWmZCrl5yDU5YFu1TOkyM7ZCJvIZBLbTzLC1ZAy6Q8hpTZAm4pNLmLPW69L7uwhBTOGlFMWT"
         }
       },
       ready: function(){
@@ -378,9 +384,12 @@
       },
       _reParserLinked: function(list) {
         for (i=0;i<list.length-1;i++){
-          if (list[i].story) {
+          if (list[i].story && !list[i].caption) {
             this.set("events." + i + ".linked", list[i+1])
-            this.splice("events", i+1, 1)
+            this.splice("events", i+1, 1);
+          } 
+          if (list[i].message) {
+            this.set("events." + i + ".message", list[i].message.replace(/(?:\r\n|\r|\n)/g, "<br />"));
           }
         }
       },
