@@ -87,7 +87,7 @@
         padding-bottom: 8px;
 
       }
-      .photo_publised {
+      .photo-source {
         max-width: 300px;
         /*max-height: 30px;*/
       }
@@ -99,6 +99,25 @@
         width: 18px;
         height: 18px;
         margin: auto 2px;
+      }
+      .nestedPost {
+        border: 1px solid #e6e6e6;
+        margin: 5px auto;
+      }
+      .nestedPost .tittlePostNested {
+        font-size: 12px;
+        font-weight: bold;
+        margin: 10px 5px;
+      }
+      .nestedPost .descriptionPostNested {
+        font-size: 10px;
+        margin: 10px 8px;
+      }
+      .nestedPost .authorPostNested {
+        text-transform: uppercase;
+        margin:10px 8px;
+        font-size: 8px;
+        color: #9197a3;
       }
     </style>
     <iron-ajax
@@ -149,7 +168,7 @@
                   <template is="dom-if" if="{{_isType(item,'added_photos')}}">
                     <div>
                       <a href="{{item.linked.link}}" target="_blank">
-                        <img class="photo_publised" src="{{_getFullPhoto(item)}}">
+                        <img class="photo-source" src="{{_getFullPhoto(item)}}">
                       </a>
                     </div>
                     <div>
@@ -168,7 +187,12 @@
                 <template is="dom-if" if="{{_noStory(item)}}">
                   <p>{{item.message}}</p>
                   <template is="dom-if" if="{{_isType(item, 'shared_story')}}">
-                    <img src="{{_getShareImg(item)}}">
+                    <div class="nestedPost">
+                      <img class="photo-source" src="{{_getShareImg(item)}}">
+                      <p class="tittlePostNested">{{item.name}}</p>
+                      <p class="descriptionPostNested">{{item.description}}</p>
+                      <p class="authorPostNested">{{item.caption}}</p>
+                    </div>
                   </template>
                 </template>
               </div>
@@ -216,7 +240,7 @@
         },
         access_token: {
           type: String,
-          value:"CAACEdEose0cBAKdKL4WQ2Ah6aKY4I6b9FnCntJ8JpZCa1JbhasgNXNz4QB2pq3d4hGK7r2Ah17g3aMduZCFNU5u3KpF07pl8cWwFTKfTqI6xl6xl2CirEmI0VuKCz2C8UU4vdqeGrbUOdduPHkwwyZB8JPER0mqYlVwOiS24LRFhIeD4Gngg1p9dVOftTHt7oYb5qgYNMGRPJ8RDdAT"
+          value:"CAACEdEose0cBAPnQLwyZBHs3f3C913Ec9WkbIhck1rEYxY1EBZAMVgpPOZBY9eFNlO4APHOICitIx2iBaZBxWrHaVE2zXRVnnCBA4AfhtmzcyRG1s3QkcTaG7HiiZBuJKcAZBUnmBsr9yERpkeZAJ7geXwmi5ZAZCZC0oszwFpro8E7TUBLK7V1VCKNR898JIvOVv2OYEXbhVsaj1JVwC6ZBO3K"
         }
       },
       ready: function(){
@@ -243,12 +267,11 @@
       /* Auxiliar function for parse data */
       _getShareImg: function(item){
         var fullUrl = item.picture;
-        fullUrl =  fullUrl.replace("%3A",":");
-        fullUrl = fullUrl.replace("%2F","/");
-        var pattern = "url=([^&#]*))";
+        var pattern = "url" + "=([^&]*)";
         var exp = new RegExp(pattern);
-        // Ponemos en valor en una variable de la ventana principal
-        var url = exp.exec(url)[1];
+        var url = exp.exec(fullUrl)[1];
+        url = url.replace(/%2F/g,"/");
+        url =  url.replace(/%3A/g,":");
         return url;
       },
       _noStory: function(item){
