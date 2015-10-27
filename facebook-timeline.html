@@ -119,16 +119,16 @@
         color: #9197a3;
       }
       .sharedStory {
-        margin: 10px 3px;
+        margin: 10px 5px;
         font-size: 10px;
       }
-      .singlePostMessage {
-        white-space: pre;
+      p {
+        margin:8px 3px;
       }
     </style>
     <iron-ajax
                id="requestData"
-               url="mockData2.json"
+               url="mockData.json"
                method="GET"
                handleAs="json"
                on-response="_dataResponse"
@@ -162,7 +162,7 @@
               <div class="horizontal layout postHeader">
                 <iron-icon id="logo" src="{{_getUserPicture(item)}}"></iron-icon>
                 <div class="vertical layout postInfo">
-                  <div id="username"><a href="http://facebook.es" target="_blank">{{_getAuthorPost(item)}}</a></div>
+                  <div id="username"><a href="{{_getUsernameUrl(item)}}" target="_blank">{{_getAuthorPost(item)}}</a></div>
                   <div>{{item.time}}</div>
                 </div>
               </div>
@@ -171,6 +171,7 @@
 
                 <!-- Nested post -->
                 <template is="dom-if" if="{{item.story}}">
+                  <!-- added photos-->
                   <template is="dom-if" if="{{_isType(item,'added_photos')}}">
                     <div>
                       <a href="{{item.linked.link}}" target="_blank">
@@ -182,12 +183,15 @@
                       <p inner-h-t-m-l="{{_parseText(item.description)}}"></p>
                     </div>
                   </template>
+
+
                   <!-- mobile_status_update case -->
                   <template is="dom-if" if="{{_isType(item, 'shared_story')}}">
                     <p inner-h-t-m-l="{{_parseText(item.description)}}"></p>
                     <p inner-h-t-m-l="{{_getWith(item.linked)}}"></p>
                   </template>
                 </template>
+                <!-- END nested post -->
 
                 <!-- Single Post-->
                 <template is="dom-if" if="{{_noStory(item)}}">
@@ -197,7 +201,7 @@
                       <img class="photo-source" src="{{_getShareImg(item)}}">
                       <p class="tittlePostNested">{{item.name}}</p>
                       <p class="descriptionPostNested">{{item.description}}</p>
-                      <p class="authorPostNested">{{item.caption}}</p>
+                      <a href="{{item.link}}" target="_blank"><p class="authorPostNested">{{item.caption}}</p></a>
                     </div>
                   </template>
                 </template>
@@ -246,7 +250,7 @@
         },
         access_token: {
           type: String,
-          value:"CAACEdEose0cBANsyeCCx0ZBGMAvvBBTlrZAMFQ0i0AbZAMnTnYvGyEjvZCBvmD0r8GgFTzfUbIEP1NPgz2vtQavUiNxx3puHKZAhcNInGS6EeWiRlcZBp17lrcQvBuUPcTyHX8yPF5r1oa2rNE2ZCWmZCrl5yDU5YFu1TOkyM7ZCJvIZBLbTzLC1ZAy6Q8hpTZAm4pNLmLPW69L7uwhBTOGlFMWT"
+          value:"CAACEdEose0cBAMsF86e71g7rH772IUcYXe2IE3oKZAHWqPsZBOChMIdfZCPTQpOXHniFgCupu8EDc664IKg2unm8jviHQZBgCphKS0n1ZCixD8WDCuiM4FJhCpraG9qArJI4ERX1zKzI1OkkuEdi8V5KlZBi2yzdJncQJGniHW0RtZBesah4tVvIiRWOpBDqCSKK3g6ZCy3E0UvCjghVWIov"
         }
       },
       ready: function(){
@@ -271,6 +275,18 @@
       },
 
       /* Auxiliar function for parse data */
+      _getUsernameUrl: function(item) {
+        var urk;
+        if (item.linked && !item.linked.from.category) {
+          url = "https://facebook.com/app_scoped_user_id/" + item.linked.from.id;
+        } else if (item.linked && item.linked.from.category) {
+          url = "http://facebook.com/pages/-/" + item.linked.from.id;
+        } else {
+          url = "https://facebook.com/app_scoped_user_id/" + item.from.id;
+
+        }
+        return url
+      },
       _getShareImg: function(item){
         var fullUrl = item.picture;
         var pattern = "url" + "=([^&]*)";
