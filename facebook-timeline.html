@@ -93,12 +93,12 @@
       }
       .postLikes > p {
         font-size: 12px;
-        margin: auto 3px;
+        margin: auto 8px auto 1px;
       }
       .postLikes > iron-icon {
         width: 18px;
         height: 18px;
-        margin: auto 3px;
+        margin: auto 2px;
       }
     </style>
     <iron-ajax
@@ -127,10 +127,13 @@
       <div class="content">
         <template is="dom-repeat" items="{{events}}">
           <paper-material elevation="2">
+            <!-- Facebook Post> -->
             <div class="post">
-              <template is="dom-if" if="{{_calculateShared(item)}}">
-                <div class="reactedTo" inner-h-t-m-l={{_getShareInformation(item)}}></div>
+              <!-- Nested header -->
+              <template is="dom-if" if="{{item.story}}">
+                <div class="reactedTo" inner-h-t-m-l="{{_getShareInformation(item)}}"></div>
               </template>
+              <!-- Generic header -->
               <div class="horizontal layout postHeader">
                 <iron-icon id="logo" src="{{_getUserPicture(item)}}"></iron-icon>
                 <div class="vertical layout postInfo">
@@ -138,31 +141,54 @@
                   <div>{{item.time}}</div>
                 </div>
               </div>
+              <!-- Post content -->
               <div class="postContent">
-                <!-- Added photos case -->
-                <template is="dom-if" if="{{_isType(item,'added_photos')}}">
-                  <div>
-                    <a href="{{item.linked.link}}" target="_blank"><img class="photo_publised" src="{{_getFullPhoto(item)}}"></img></a>
-                  </div>
-                <div>
-                  <p inner-h-t-m-l="{{_parseText(item.description)}}"></p>
-                  <p inner-h-t-m-l="{{_getWith(item.linked)}}"></p>
-                </div>
+
+                <!-- Nested post -->
+                <template is="dom-if" if="{{item.story}}">
+                  <template is="dom-if" if="{{_isType(item,'added_photos')}}">
+                    <div>
+                      <a href="{{item.linked.link}}" target="_blank">
+                        <img class="photo_publised" src="{{_getFullPhoto(item)}}">
+                      </a>
+                    </div>
+                    <div>
+                      <p inner-h-t-m-l="{{_parseText(item.description)}}"></p>
+                      <p inner-h-t-m-l="{{_getWith(item.linked)}}"></p>
+                    </div>
+                  </template>
+                  <!-- mobile_status_update case -->
+                  <template is="dom-if" if="{{_isType(item, 'shared_story')}}">
+                    <p inner-h-t-m-l="{{_parseText(item.description)}}"></p>
+                    <p inner-h-t-m-l="{{_getWith(item.linked)}}"></p>
+                  </template>
                 </template>
-              <!-- mobile_status_update case -->
-              <template is="dom-if" if="{{_isType(item, 'shared_story')}}">
-                <p inner-h-t-m-l="{{_parseText(item.description)}}"></p>
-                <p inner-h-t-m-l="{{_getWith(item.linked)}}"></p>
-              </template>
-            </div>
-            <div class="postLikes horizontal layout">
-              <template is="dom-if" if="{{item.likes.data.length}}">
-                <iron-icon src="like.png"></iron-icon>
-                <p>{{item.likes.data.length}}</p>
-              </template>
-              <div><iron-icon></iron-icon></div>
-              <div><iron-icon></iron-icon></div>
-            </div>
+
+                <!-- Single Post-->
+                <template is="dom-if" if="{{_noStory(item)}}">
+                  <p>{{item.message}}</p>
+                  <template is="dom-if" if="{{_isType(item, 'shared_story')}}">
+                    <img src="{{_getShareImg(item)}}">
+                  </template>
+                </template>
+              </div>
+              <!-- Likes, comments and shares -->
+              <!-- TODO if is a page, do i show share information?-->
+              <div class="postLikes horizontal layout">
+                <template is="dom-if" if="{{item.likes.data.length}}">
+                  <iron-icon src="like.png"></iron-icon>
+                  <p>{{item.likes.data.length}}</p>
+                </template>
+                <template is="dom-if" if="{{item.comments}}">
+                  <iron-icon src="comments.png"></iron-icon>
+                  <p>{{item.comments.data.length}}</p>
+                </template>
+                <template is="dom-if" if="{{_getShared(item)}}">
+                  <iron-icon src="shared.png"></iron-icon>
+                  <p>{{item.linked.shares.count}}</p>
+                </template>
+
+              </div>
             </div>
           </paper-material>
         </template>
@@ -171,86 +197,93 @@
 
   </template>
 
-<script>
-  Polymer({
-    is: "facebook-timeline",
-    properties: {
-      events: {
-        type: Array,
-        value: []
+  <script>
+    Polymer({
+      is: "facebook-timeline",
+      properties: {
+        events: {
+          type: Array,
+          value: []
+        },
+        language: {
+          type:String,
+          value: "en",
+          observer: "_languageUpdate"
+        },
+        languageUrl: {
+          type:String,
+          computed: "_getLanguageUrl(idiom)"
+        },
+        access_token: {
+          type: String,
+          value:"CAACEdEose0cBAKdKL4WQ2Ah6aKY4I6b9FnCntJ8JpZCa1JbhasgNXNz4QB2pq3d4hGK7r2Ah17g3aMduZCFNU5u3KpF07pl8cWwFTKfTqI6xl6xl2CirEmI0VuKCz2C8UU4vdqeGrbUOdduPHkwwyZB8JPER0mqYlVwOiS24LRFhIeD4Gngg1p9dVOftTHt7oYb5qgYNMGRPJ8RDdAT"
+        }
       },
-      language: {
-        type:String,
-        value: "en",
-        observer: "_languageUpdate"
-      },
-      languageUrl: {
-        type:String,
-        computed: "_getLanguageUrl(idiom)"
-      },
-      access_token: {
-        type: String,
-        value:"CAANMUmJPs2UBAApF3NhLix1XZAFWtit5GlA6ZCHDyG84nEHRJRmzWr5EOYdbl0Rl3c2venvrldGkKLmd68MHapUA98FIjkptUxzO8gwC54EmsebOZAW6G34Oo5RgsZAHpkAFqatbphbsY2qdSCNNdsvVhO7HfzLU7yKBlLuf1RED9ZAI5jNoyJyGDdCvm2bTLvZAqulAoRSGvVzQXhlvI8"
-      }
-    },
-    ready: function(){
-      this.$.requestLanguage.generateRequest();
-    },
-
-    /* Observer and computed properties*/
-    _languageUpdate: function(newValue){
-      if(newValue === "en"){
-        this.language = "en";
-        this.idiom = "en_en.json"
+      ready: function(){
         this.$.requestLanguage.generateRequest();
-      }
-      else if(newValue === "es"){
-        this.language = "es";
-        this.idiom = "es_es.json"
-        this.$.requestLanguage.generateRequest();
-      }
-    },
-    _getLanguageUrl:function(idiom){
-      return "language/" + idiom;
-    },
+      },
 
-    /* Auxiliar function for parse data */
-    _existShare: function(actions){
-      var exist = false;
-      for (j=0;j<actions.length && !exist;j++){
-        if (actions[j].name == "Share")
-          exist = true;
-      }
-      return exist;
-    },
-    _calculateShared: function(item) {
-      return item.story;
-    },
-    _getShareInformation: function(item) {
-      var tag = this._parserUser(item.from) + item.story.replace(item.from.name+ " ", "");
-      return tag;
-    },
-    _getUserPicture: function(item) {
-      var link = "https://graph.facebook.com/";
-      link += item.linked? item.linked.from.id : item.from.id
-      link +="/picture/?access_token=" + this.access_token;
-      return  link;
-    },
-    _getAuthorPost: function(item) {
-      return item.linked? item.linked.from.name : item.from.name;
-    },
-    _isType: function(item, type) {
-      show = false;
-      if (item.linked){
-        show = item.linked.status_type === type;
-      }
-      return show;
-    },
-    _getFullPhoto: function(item) {
-      return "https://graph.facebook.com/" + item.linked.object_id + "/picture?access_token=" + this.access_token;
-    },
-    _getWith: function(item) {
-      var html = "";
+      /* Observer and computed properties*/
+      _languageUpdate: function(newValue){
+        if(newValue === "en"){
+          this.language = "en";
+          this.idiom = "en_en.json"
+          this.$.requestLanguage.generateRequest();
+        }
+        else if(newValue === "es"){
+          this.language = "es";
+          this.idiom = "es_es.json"
+          this.$.requestLanguage.generateRequest();
+        }
+      },
+      _getLanguageUrl:function(idiom){
+        return "language/" + idiom;
+      },
+
+      /* Auxiliar function for parse data */
+      _getShareImg: function(item){
+        var fullUrl = item.picture;
+        fullUrl =  fullUrl.replace("%3A",":");
+        fullUrl = fullUrl.replace("%2F","/");
+        var pattern = "url=([^&#]*))";
+        var exp = new RegExp(pattern);
+        // Ponemos en valor en una variable de la ventana principal
+        var url = exp.exec(url)[1];
+        return url;
+      },
+      _noStory: function(item){
+        return item.story === undefined;
+      },
+      _getShared: function(item){ 
+        return item.linked && item.linked.shares;
+      },
+      _getShareInformation: function(item) {
+        var tag = this._parserUser(item.from) + item.story.replace(item.from.name+ " ", "");
+        return tag;
+      },
+      _getUserPicture: function(item) {
+        var link = "https://graph.facebook.com/";
+        link += item.linked? item.linked.from.id : item.from.id
+        link +="/picture/?access_token=" + this.access_token;
+        return  link;
+      },
+      _getAuthorPost: function(item) {
+        return item.linked? item.linked.from.name : item.from.name;
+      },
+      _isType: function(item, type) {
+        show = false;
+        if (item.linked){
+          show = item.linked.status_type === type;
+        } else {
+          show = item.status_type === type;
+        }
+        return show;
+      },
+      _getFullPhoto: function(item) {
+        return "https://graph.facebook.com/" + item.linked.object_id + "/picture?access_token=" + this.access_token;
+      },
+      _getWith: function(item) {
+        var html = "";
         if (item && item.with_tags && item.with_tags.data.length > 0) {
           html += "-" + this.data.with + " " + this._parserUser(item.with_tags.data[0]) + " ";
           if (item.with_tags.data.length > 1) {
@@ -259,100 +292,100 @@
             html += item.with_tags.data.length >2 ? this.data.others: this.data.other
           }
         }
-      return html;
-    },
-    // Private functions
-    _language_response: function(event, detail){
-      this.data = detail.response;
-      this.$.requestData.generateRequest();
-    },
-    _dataResponse: function(event, detail){
-      this.set("events", detail.response.data);
-      this._reParserLinked(this.events);
-      this._changeTime(this.events);
-    },
-    _changeTime: function(list){
-      for (i=0;i<list.length;i++){
-        var date = new Date(list[i].updated_time);
-        var current_date = new Date();
-        var time;
-        /* Años*/
-        if ((current_date.getFullYear() - date.getFullYear()) != 0) {
-          var dif = current_date.getFullYear() - date.getFullYear()
-          time = dif==1 ? dif + " " + this.data.year : dif + " " + this.data.years;
-          /* Meses */
-        } else if ((current_date.getMonth() - date.getMonth()) != 0) { 
-          var dif = current_date.getMonth() - date.getMonth();
-          time = dif==1 ? dif + " " + this.data.month : dif + " " + this.data.months;
-          /* Dias */
-        } else if((current_date.getDate() - date.getDate()) == 0 ){
-          if((current_date.getHours() - date.getHours()) == 0 ){
-            if( (current_date.getMinutes() - date.getMinutes()) == 0 ){
+        return html;
+      },
+      // Private functions
+      _language_response: function(event, detail){
+        this.data = detail.response;
+        this.$.requestData.generateRequest();
+      },
+      _dataResponse: function(event, detail){
+        this.set("events", detail.response.data);
+        this._reParserLinked(this.events);
+        this._changeTime(this.events);
+      },
+      _changeTime: function(list){
+        for (i=0;i<list.length;i++){
+          var date = new Date(list[i].updated_time);
+          var current_date = new Date();
+          var time;
+          /* Años*/
+          if ((current_date.getFullYear() - date.getFullYear()) != 0) {
+            var dif = current_date.getFullYear() - date.getFullYear()
+            time = dif==1 ? dif + " " + this.data.year : dif + " " + this.data.years;
+            /* Meses */
+          } else if ((current_date.getMonth() - date.getMonth()) != 0) { 
+            var dif = current_date.getMonth() - date.getMonth();
+            time = dif==1 ? dif + " " + this.data.month : dif + " " + this.data.months;
+            /* Dias */
+          } else if((current_date.getDate() - date.getDate()) == 0 ){
+            if((current_date.getHours() - date.getHours()) == 0 ){
+              if( (current_date.getMinutes() - date.getMinutes()) == 0 ){
 
-              time = current_date.getSeconds() - date.getSeconds()+" "+this.data.seconds
+                time = current_date.getSeconds() - date.getSeconds()+" "+this.data.seconds
+              }
+              else{
+                time = current_date.getMinutes() - date.getMinutes()+" "+this.data.minutes
+              }
             }
             else{
-              time = current_date.getMinutes() - date.getMinutes()+" "+this.data.minutes
+              if (current_date.getHours() - date.getHours() == 1) {
+                time = current_date.getHours() - date.getHours()+" "+this.data.hour;
+              }else {
+                time = current_date.getHours() - date.getHours()+" "+this.data.hours;
+              }
+            }
+          }
+          else if( ((current_date.getDate() - date.getDate()) < 15) && ( (current_date.getDate() - date.getDate()) > 0)){
+            if( (current_date.getDate() - date.getDate()) == 1){
+              time = current_date.getDate() - date.getDate()+" "+ this.data.day
+            }
+            else{
+              time = current_date.getDate() - date.getDate()+" "+this.data.days
             }
           }
           else{
-            if (current_date.getHours() - date.getHours() == 1) {
-              time = current_date.getHours() - date.getHours()+" "+this.data.hour;
-            }else {
-              time = current_date.getHours() - date.getHours()+" "+this.data.hours;
-            }
+            var month = [this.data.january,this.data.february,this.data.march,this.data.april, this.data.may,this.data.june,this.data.july,this.data.august,this.data.september,this.data.october,this.data.november,this.data.december];
+            time = date.getDate()+" "+this.data.of+" "+month[date.getMonth()]+" "+this.data.of+" "+date.getFullYear();
+
           }
-        }
-        else if( ((current_date.getDate() - date.getDate()) < 15) && ( (current_date.getDate() - date.getDate()) > 0)){
-          if( (current_date.getDate() - date.getDate()) == 1){
-            time = current_date.getDate() - date.getDate()+" "+ this.data.day
-          }
-          else{
-            time = current_date.getDate() - date.getDate()+" "+this.data.days
-          }
-        }
-        else{
-          var month = [this.data.january,this.data.february,this.data.march,this.data.april, this.data.may,this.data.june,this.data.july,this.data.august,this.data.september,this.data.october,this.data.november,this.data.december];
-          time = date.getDate()+" "+this.data.of+" "+month[date.getMonth()]+" "+this.data.of+" "+date.getFullYear();
+          this.set("events." + i + ".time", time);
 
         }
-        this.set("events." + i + ".time", time);
-
-      }
-    },
-    _reParserLinked: function(list) {
-      for (i=0;i<list.length;i++){
-        if (list[i].actions && this._existShare(list[i].actions)) {
-          this.set("events." + i + ".linked", list[i+1])
-          this.splice("events", i+1, 1)
+      },
+      _reParserLinked: function(list) {
+        for (i=0;i<list.length-1;i++){
+          if (list[i].story) {
+            this.set("events." + i + ".linked", list[i+1])
+            this.splice("events", i+1, 1)
+          }
         }
-      }
-    },
-    _parserUser: function(user) {
-      var tag = "<a style='color:rgb(59, 89, 152);text-decoration:none;font-weight:bold' href='https://www.facebook.com/app_scoped_user_id/" + user.id + "' target='_blank'>" + user.name + " </a>";
-      return tag;
-    },
-    _parseText: function(text) {
-      if (text) {
-        text = this._parseURL(text);
-        text = this._parseHashtag(text);
-      }
-      return text? text : "";
-    },
-    _parseURL: function(tweet) {
-      return tweet.replace(/[^"](?:http|https)+:\/\/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&~\?\/.=#]+/g, function(url) {
-        url = url.replace("#", "%23");
-        return '<a style="color:rgb(59, 89, 152)" href='+url+' target="_blank">'+url+'</a>'
-      })
-    },
-    _parseHashtag: function(tweet) {
-      return tweet.replace(/[#]+[A-Za-z0-9-_ñáéíóúàèìòùç]+/g, function(t) {
-        var tag = t.replace("#","")
-        return '<a style="color:rgb(59, 89, 152)" href="https://twitter.com/hashtag/'+tag+' "target="_blank">#'+tag+'</a>'
-      });
-    },
+      },
+      _parserUser: function(user) {
+        var tag = "<a style='color:rgb(59, 89, 152);text-decoration:none;font-weight:bold' href='https://www.facebook.com/app_scoped_user_id/" + user.id + "' target='_blank'>" + user.name + " </a>";
+        return tag;
+      },
+      _parseText: function(text) {
+        if (text) {
+          text = this._parseURL(text);
+          text = this._parseHashtag(text);
+        }
+        return text? text : "";
+      },
+      _parseURL: function(tweet) {
+        return tweet.replace(/[^"](?:http|https)+:\/\/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&~\?\/.=#]+/g, function(url) {
+          url = url.replace("#", "%23");
+          return '<a style="color:rgb(59, 89, 152)" href='+url+' target="_blank">'+url+'</a>'
+        })
+      },
+      _parseHashtag: function(tweet) {
+        return tweet.replace(/[#]+[A-Za-z0-9-_ñáéíóúàèìòùç]+/g, function(t) {
+          var tag = t.replace("#","")
+          return '<a style="color:rgb(59, 89, 152)" href="https://twitter.com/hashtag/'+tag+' "target="_blank">#'+tag+'</a>'
+        });
+      },
 
-  });
-</script>
+    });
+  </script>
 
 </dom-module>
