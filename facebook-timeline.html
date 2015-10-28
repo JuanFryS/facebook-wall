@@ -99,28 +99,40 @@
         height: 18px;
         margin: auto 2px;
       }
-      .nestedPost {
+      .borderPost {
         border: 1px solid #e6e6e6;
         margin: 5px auto;
       }
-      .nestedPost .tittlePostNested {
+      .borderPost .tittlePostNested {
         font-size: 12px;
         font-weight: bold;
         margin: 10px 5px;
       }
-      .nestedPost .descriptionPostNested {
+      .borderPost .descriptionPostNested {
         font-size: 10px;
         margin: 10px 8px;
       }
-      .nestedPost .authorPostNested {
+      .borderPost .authorPostNested {
         text-transform: uppercase;
         margin:10px 8px;
         font-size: 8px;
         color: #9197a3;
       }
+      .pageStyle {
+        padding-bottom: 1px;
+        margin-bottom: 5px;
+        border-left: 2px solid #ccc;
+      }
       .sharedStory {
         margin: 10px 5px;
         font-size: 10px;
+
+      }
+      .pageStyle .sharedDescription {
+        border-left: 2px dotted #ccc;
+        padding-left: 12px;
+        margin-left: 10px;
+
       }
       p {
         margin:8px 3px;
@@ -128,7 +140,7 @@
     </style>
     <iron-ajax
                id="requestData"
-               url="mockData.json"
+               url="mockData3.json"
                method="GET"
                handleAs="json"
                on-response="_dataResponse"
@@ -173,20 +185,35 @@
                 <template is="dom-if" if="{{item.story}}">
                   <!-- added photos-->
                   <template is="dom-if" if="{{_isType(item,'added_photos')}}">
-                    <div>
+                    <!-- Description like header if story dont exist-->
+                    
+                    <template is="dom-if" if="{{_checkElement(item,'false')}}">
+                      <p class="sharedDescription" inner-h-t-m-l="{{_parseText(item.description)}}"></p>
+                    </template>
+                    
+                    <div class="borderPost">
                       <a href="{{item.linked.link}}" target="_blank">
                         <img class="photo-source" src="{{_getFullPhoto(item)}}">
                       </a>
                     </div>
-                    <div>
-                      <p class="sharedStory">{{item.linked.story}}</p>
-                      <p inner-h-t-m-l="{{_parseText(item.description)}}"></p>
-                    </div>
+                    <!-- Description like body if story exist-->
+                    <template is="dom-if" if="{{_checkElement(item.linked.story, 'true')}}">
+                      <div class$="{{_getPageStyle(item.linked.story)}}">
+                        <p class="sharedStory">{{item.linked.story}}</p>
+                        <p class="sharedDescription" inner-h-t-m-l="{{_parseText(item.description)}}"></p>
+                      </div>
+                    </template>
                   </template>
 
 
-                  <!-- mobile_status_update case -->
+                  <!-- shared_story case -->
                   <template is="dom-if" if="{{_isType(item, 'shared_story')}}">
+                    <div>
+                      <a href="{{item.linked.link}}" target="_blank">
+                       <template is="dom-if"></template>
+                        <img class="photo-source" src="{{_getShareImg(item)}}">
+                      </a>
+                    </div>
                     <p inner-h-t-m-l="{{_parseText(item.description)}}"></p>
                     <p inner-h-t-m-l="{{_getWith(item.linked)}}"></p>
                   </template>
@@ -197,7 +224,7 @@
                 <template is="dom-if" if="{{_noStory(item)}}">
                   <p inner-h-t-m-l={{item.message}}></p>
                   <template is="dom-if" if="{{_isType(item, 'shared_story')}}">
-                    <div class="nestedPost">
+                    <div class="borderPost">
                       <img class="photo-source" src="{{_getShareImg(item)}}">
                       <p class="tittlePostNested">{{item.name}}</p>
                       <p class="descriptionPostNested">{{item.description}}</p>
@@ -211,6 +238,8 @@
               <div class="postLikes horizontal layout">
                 <template is="dom-if" if="{{item.likes.data.length}}">
                   <iron-icon src="like.png"></iron-icon>
+                  <!-- Request #likes to www.graph.facebook.com/{object_id}/likes?
+access_token={{access_token}}&summary=true -->
                   <p>{{item.likes.data.length}}</p>
                 </template>
                 <template is="dom-if" if="{{item.comments}}">
@@ -250,7 +279,7 @@
         },
         access_token: {
           type: String,
-          value:"CAACEdEose0cBAMsF86e71g7rH772IUcYXe2IE3oKZAHWqPsZBOChMIdfZCPTQpOXHniFgCupu8EDc664IKg2unm8jviHQZBgCphKS0n1ZCixD8WDCuiM4FJhCpraG9qArJI4ERX1zKzI1OkkuEdi8V5KlZBi2yzdJncQJGniHW0RtZBesah4tVvIiRWOpBDqCSKK3g6ZCy3E0UvCjghVWIov"
+          value:"CAACEdEose0cBAIq0ZA237OGEzROfryc5P0ZBQl9FgLqZCpuLeJzaCZAhpyVKLT8M1wYDTNZCo3cKDS4lXSb9hpzln0ocMTirZBuqPJxi7yxtHZB3zBhSnUKMWqYA6pfSxKZBSlmt0lU5c2GRZCE1TENZAiP2GZBkmGSvq0y5QxMyQPUT8CFnjD61jbeZBBT2XEhZAUDrqfpw382IY13ZC41JQxZAkdx"
         }
       },
       ready: function(){
@@ -275,6 +304,13 @@
       },
 
       /* Auxiliar function for parse data */
+      _checkElement(element, bool) {
+        // XNOR comparation for booleans
+        return element.linked && ((element.linked.story && bool=='true') || (!element.linked.story && bool=='false'));
+      },
+      _getPageStyle: function(item){
+        return item? "pageStyle": "";
+      },
       _getUsernameUrl: function(item) {
         var urk;
         if (item.linked && !item.linked.from.category) {
@@ -288,7 +324,7 @@
         return url
       },
       _getShareImg: function(item){
-        var fullUrl = item.picture;
+        var fullUrl = item.picture || item.linked.picture;
         var pattern = "url" + "=([^&]*)";
         var exp = new RegExp(pattern);
         var url = exp.exec(fullUrl)[1];
@@ -406,6 +442,7 @@
           } 
           if (list[i].message) {
             this.set("events." + i + ".message", list[i].message.replace(/(?:\r\n|\r|\n)/g, "<br />"));
+            this.set("events." + i + ".message", this._parseText(list[i].message));
           }
         }
       },
