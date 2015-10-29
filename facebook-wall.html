@@ -6,7 +6,7 @@
 <link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="bower_components/paper-material/paper-material.html">
 <link rel="import" href="bower_components/iron-ajax/iron-ajax.html">
-<dom-module id="facebook-timeline">
+<dom-module id="facebook-wall">
 
   <template>
     <style is="custom-style">
@@ -148,7 +148,7 @@
     </style>
     <iron-ajax
                id="requestData"
-               url="mockData2.json"
+               url="mockData/mockData2.json"
                method="GET"
                handleAs="json"
                on-response="_dataResponse"
@@ -164,8 +164,8 @@
     </iron-ajax>
     <paper-header-panel mode="waterfall" class="blue">
       <div class="paper-header horizontal layout center-justified">
-        <div><iron-icon src="facebook.svg"></iron-icon></div>
-        <div class="flex" style="text-align:center"><span>Facebook Timeline</span></div>
+        <div><iron-icon src="images/facebook.svg"></iron-icon></div>
+        <div class="flex" style="text-align:center"><span>Facebook wall</span></div>
         <div><paper-icon-button icon="refresh"></paper-icon-button></div>
 
       </div>
@@ -259,7 +259,7 @@
 
                 <!-- Single Post-->
                 <template is="dom-if" if="{{_noExist(item.linked)}}">
-                 
+
                   <p inner-h-t-m-l="{{item.message}}"></p>
                   <!-- status_type = shared_story --> 
                   <template is="dom-if" if="{{_isType(item.status_type, 'shared_story')}}">
@@ -284,20 +284,19 @@
               </div>
 
               <!-- Likes, comments and shares -->
-              <!-- TODO if is a page, do i show share information?-->
               <div class="postLikes horizontal layout">
                 <template is="dom-if" if="{{item.likes.data.length}}">
-                  <iron-icon src="like.png"></iron-icon>
+                  <iron-icon src="images/like.png"></iron-icon>
                   <!-- Request #likes to www.graph.facebook.com/{object_id}/likes?
 access_token={{access_token}}&summary=true -->
                   <p>{{item.likes.data.length}}</p>
                 </template>
                 <template is="dom-if" if="{{item.comments}}">
-                  <iron-icon src="comments.png"></iron-icon>
+                  <iron-icon src="images/comments.png"></iron-icon>
                   <p>{{item.comments.data.length}}</p>
                 </template>
                 <template is="dom-if" if="{{_getShared(item)}}">
-                  <iron-icon src="shared.png"></iron-icon>
+                  <iron-icon src="images/shared.png"></iron-icon>
                   <p>{{item.linked.shares.count}}</p>
                 </template>
 
@@ -312,7 +311,7 @@ access_token={{access_token}}&summary=true -->
 
   <script>
     Polymer({
-      is: "facebook-timeline",
+      is: "facebook-wall",
       properties: {
         events: {
           type: Array,
@@ -321,7 +320,8 @@ access_token={{access_token}}&summary=true -->
         language: {
           type:String,
           value: "en",
-          observer: "_languageUpdate"
+          observer: "_languageUpdate",
+          refrectToAttribute:true
         },
         languageUrl: {
           type:String,
@@ -329,7 +329,8 @@ access_token={{access_token}}&summary=true -->
         },
         access_token: {
           type: String,
-          value:"CAACEdEose0cBAHN18RkndJZCrTjjZCq1xQOCy55icEGFg0ue8LSxZCDsqfUPhdarJsZCIydvozER10xiLdDFaXa65XDekFEY2Ew7h5CWZCZCiNSGtLkIM0MArbHMtHatecDWUMXIoeQ5dKIDNV7265jIbRJNpkzfjngS4iDM3fupLvFr89yWQZAlZCcUpZBegWmnzRMiSRC3P9jv9RSCzfLI9"
+          value:"",
+          refrectToAttribute:true
         }
       },
       ready: function(){

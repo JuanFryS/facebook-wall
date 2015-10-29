@@ -1,14 +1,14 @@
 {
-  "name": "facebook-timeline",
+  "name": "facebook-wall",
   "version": "1.0.0",
   "keywords": [
     "polymer",
     "web-components",
     "facebook",
-    "timeline",
-    "facebook-timeline"
+    "wall",
+    "facebook-wall"
   ],
-  "main": "facebook-timeline.html",
+  "main": "facebook-wall.html",
   "dependencies": {
     "iron-ajax": "PolymerElements/iron-ajax#~1.0.7",
     "paper-header-panel": "PolymerElements/paper-header-panel#~1.0.5",
@@ -21,10 +21,10 @@
   "authors": [
     "Miguel Ortega Moreno <miguel.ortega.moreno5@gmail.com>"
   ],
-  "description": "Polymer component which show a facebook timeline",
+  "description": "Polymer component which show a facebook wall",
   "moduleType": [],
   "license": "MIT",
-  "homepage": "https://github.com/Mortega5/facebook-timeline",
+  "homepage": "https://github.com/Mortega5/facebook-wall",
   "ignore": [
     "node_modules",
     "bower_components",
