@@ -29,11 +29,11 @@ using [Facebook API](https://developers.facebook.com/docs/facebook-login/access-
 
   |                      | link | video | photo | status | offer | post |
   |----------------------|:------:|:------:|:-------:|:--------:|:-------:|:-------:|
-  | mobile_status_update |:white_check_mark:|:white_check_mark:|:white_check_mark:|        |       |       |
+  | mobile_status_update |      |      |       |        |       |       |
   | created_note         |      |      |       |        |       |       |
   | added_photos         |      |      |       |        |       |       |
   | added_video          |      |      |       |        |       |       |
-  | shared_story         |      |      |       |        |       |       |
+  | shared_story         |:white_check_mark:|:white_check_mark:|:white_check_mark:|        |       |       |
   | created_group        |      |      |       |        |       |       |
   | created_event        |      |      |       |        |       |       |
   | wall_post            |      |      |       |        |       |       |
