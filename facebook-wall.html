@@ -304,6 +304,14 @@ access_token={{access_token}}&summary=true -->
             </div>
           </paper-material>
         </template>
+        <template is="dom-if" if="{{_noExist(events.length)}}">
+          <paper-material elevation="2">
+            <div class="post vertical center-justified layout">
+              <img src="images/oops.png">
+              <p>{{data.error.noToken}}</p>
+            </div>
+          </paper-material>
+        </template>
       </div>
     </paper-header-panel>
 
@@ -330,30 +338,32 @@ access_token={{access_token}}&summary=true -->
         access_token: {
           type: String,
           value:"",
+          observer: "_checkAccessToken",
           refrectToAttribute:true
         }
       },
-      ready: function(){
-        this.$.requestLanguage.generateRequest();
-      },
-
       /* Observer and computed properties*/
       _languageUpdate: function(newValue){
         if(newValue === "en"){
           this.language = "en";
           this.idiom = "en_en.json"
-          this.$.requestLanguage.generateRequest();
         }
         else if(newValue === "es"){
           this.language = "es";
           this.idiom = "es_es.json"
-          this.$.requestLanguage.generateRequest();
+
         }
+        this.$.requestLanguage.generateRequest();
+
       },
       _getLanguageUrl:function(idiom){
         return "language/" + idiom;
       },
-
+      _checkAccessToken: function(newValue) {
+        if (newValue) {
+          this.$.requestData.generateRequest();
+        }
+      },
       /* Auxiliar function for parse data */
       _checkElement(element, bool) {
         // XNOR comparation for booleans
@@ -438,10 +448,13 @@ access_token={{access_token}}&summary=true -->
         }
         return html;
       },
+
       // Private functions
       _language_response: function(event, detail){
         this.data = detail.response;
-        this.$.requestData.generateRequest();
+        if (this.access_token) {
+          this.$.requestData.generateRequest();
+        }
       },
       _dataResponse: function(event, detail){
         this.set("events", detail.response.data);
