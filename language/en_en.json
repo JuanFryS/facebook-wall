@@ -28,5 +28,8 @@
   "with": "with",
   "and": "and",
   "others": "others",
-  "other": "other"
+  "other": "other",
+  "error": {
+    "noToken": "Opsss!! We cannot show your posts at this moment. Try it later."
+  }
 }
