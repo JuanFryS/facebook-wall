@@ -146,6 +146,11 @@
       .singleSharedDescription {
         margin: 10px 5px;
       }
+      .loading {
+        width:50%;
+        height: 50%;
+        margin:auto auto;
+      }
     </style>
     <iron-ajax
                id="requestData"
@@ -308,8 +313,7 @@ access_token={{access_token}}&summary=true -->
         <template is="dom-if" if="{{_noExist(events.length)}}">
           <paper-material elevation="2">
             <div class="post vertical center-justified layout">
-              <img src="images/oops.png">
-              <p>{{data.error.noToken}}</p>
+              <img class="loading" src="https://cbschicago.files.wordpress.com/2014/09/loading.gif?w=620&h=349&crop=1">
             </div>
           </paper-material>
         </template>
