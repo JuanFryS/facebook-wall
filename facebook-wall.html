@@ -11,12 +11,14 @@
   <template>
     <style is="custom-style">
       :host {
-        font-family: helvetica, arial, sans-serif;
-        color: black;
+        font-family: helvetica, arial, sans-serif
+        --facebook-wall-color: black;
+        --facebook-wall-width: 420px;
+        --facebook-wall-height: 450px;
       }
       paper-header-panel {
-        width: 420px;
-        height: 450px;
+        width: var(--facebook-wall-width);
+        height: var(--facebook-wall-height);
         @apply(--shadow-elevation-3dp);
         border-radius: 8px;
         background: #E9EAED;
@@ -60,7 +62,7 @@
       }
 
       .postInfo{
-        font-size: 10px;
+        font-size: 12px;
         margin:8px;
 
       }
@@ -92,7 +94,8 @@
 
       }
       .photo-source {
-        max-width: 100%;
+        width: 100%;
+        height: auto;
       }
       .postLikes > p {
         font-size: 12px;
@@ -113,7 +116,7 @@
         margin: 10px 5px;
       }
       .descriptionPostNested {
-        font-size: 10px;
+        font-size: 12px;
         margin: 10px 8px;
       }
       .authorPostNested {
@@ -129,7 +132,7 @@
       }
       .sharedStory {
         margin: 10px 5px;
-        font-size: 10px;
+        font-size: 12px;
 
       }
       .sharedDescription {
@@ -151,7 +154,7 @@
       }
       iframe.video {
         width: 100%;
-        height: 208px;
+        height: var(--iframe-video-height);
       }
     </style>
     <iron-ajax
@@ -170,7 +173,7 @@
                on-response="_language_response"
                >
     </iron-ajax>
-    <paper-header-panel mode="waterfall" class="blue">
+    <paper-header-panel id="header" mode="waterfall" class="blue">
       <div class="paper-header horizontal layout center-justified">
         <div><iron-icon src="images/facebook.svg"></iron-icon></div>
         <div class="flex" style="text-align:center"><span>Facebook wall</span></div>
@@ -358,6 +361,8 @@ access_token={{access_token}}&summary=true -->
       },
       attached: function(){
         this.$.requestLanguage.generateRequest();
+        this.customStyle['--iframe-video-height'] = Math.floor((this.$.header.offsetWidth-6) * 9 / 16) + "px";
+        this.updateStyles();
       },
       /* Observer and computed properties*/
       _languageUpdate: function(newValue){
