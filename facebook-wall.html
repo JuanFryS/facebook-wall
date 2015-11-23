@@ -208,7 +208,10 @@
 										<template is="dom-if" if="{{_checkElement(item, 'false')}}">
 											<p inner-h-t-m-l="{{_parseText(item.description)}}"></p>
 										</template>
-
+                    
+                    <template is="dom-if" if="{{item.message}}">
+                      <p>{{item.message}}</p>
+                    </template>
 										<div class="borderPost">
 											<a href="{{item.linked.link}}" target="_blank">
 												<template is="dom-if" if="{{_isType(item.linked.type, 'photo','link')}}">
@@ -257,7 +260,6 @@
 											<a href="{{item.link}}" target="_blank"><p class="authorPostNested">{{item.linked.caption}}</p></a>
 										</div>
 									</template>
-
 								</template>
 								<!-- END nested post -->
 
@@ -374,8 +376,8 @@ access_token={{access_token}}&summary=true -->
 				return component_directory + "language/" + idiom;
 			},
 			_getRequestDataUrl: function(component_directory, access_token){
-				return component_directory + "mockData/mockData.json";
-				/*return "https://graph.facebook.com/v2.3/me?fields=home&pretty=1&access_token=" + this.access_token;*/
+				/*return component_directory + "mockData/mockData.json";*/
+				return "https://graph.facebook.com/v2.3/me?fields=home&pretty=1&access_token=" + this.access_token;
 			},
 			_checkAccessToken: function(newValue) {
 				if (newValue) {
@@ -432,7 +434,7 @@ access_token={{access_token}}&summary=true -->
 				return item.linked && item.linked.shares;
 			},
 			_getShareInformation: function(item) {
-				tag = this._parserUser(item.from) + item.story.replace(item.from.name+ " ", "");
+				tag = this._parserUser(item.from) + " " + item.story.replace(item.from.name+ " ", "");
 				return tag;
 			},
 			_getUserPicture: function(item) {
@@ -548,11 +550,11 @@ access_token={{access_token}}&summary=true -->
 				}
 			},
 			_parserUser: function(user) {
-				var tag = "<a style='color:rgb(59, 89, 152);font-weight:bold;text-decoration:none' href='https://www.facebook.com/app_scoped_user_id/" + user.id + "' target='_blank'>" + user.name + " </a>";
+				var tag = "<a style='color:rgb(59, 89, 152);font-weight:bold;text-decoration:none;overflow-wrap:break-word' href='https://www.facebook.com/app_scoped_user_id/" + user.id + "' target='_blank'>" + user.name + "</a>";
 				return tag;
 			},
 			_parsePageUrl: function(page) {
-				var tag = "<a style='color:rgb(59, 89, 152);font-weight:bold;text-decoration:none' href='http://facebook.com/pages/-/" + page.id + "' target='_blank'>" + page.name + " </a>";
+				var tag = "<a style='color:rgb(59, 89, 152);font-weight:bold;text-decoration:none;overflow-wrap:break-word' href='http://facebook.com/pages/-/" + page.id + "' target='_blank'>" + page.name + "</a>";
 				return tag
 			},
 			_parseText: function(text) {
@@ -565,13 +567,13 @@ access_token={{access_token}}&summary=true -->
 			_parseURL: function(tweet) {
 				return tweet.replace(/(?:http|https)+:\/\/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&~\?\/.=#]+/g, function(url) {
 					url = url.replace("#", "%23");
-					return '<a style="color:rgb(59, 89, 152)" href='+url+' target="_blank">'+url+'</a>'
+					return '<a style="color:rgb(59, 89, 152);overflow-wrap:break-word" href='+url+' target="_blank">'+url+'</a>'
 				})
 			},
 			_parseHashtag: function(tweet) {
 				return tweet.replace(/[#]+[A-Za-z0-9-_ñáéíóúàèìòùç]+/g, function(t) {
 					var tag = t.replace("#","")
-					return '<a style="color:rgb(59, 89, 152)" href="https://www.facebook.com/hashtag/'+tag+' "target="_blank">#'+tag+'</a>'
+					return '<a style="color:rgb(59, 89, 152);overflow-wrap:break-word" href="https://www.facebook.com/hashtag/'+tag+' "target="_blank"><span>#'+tag+'</span></a>'
 				});
 			},
 		});
