@@ -377,11 +377,9 @@ access_token={{access_token}}&summary=true -->
         return component_directory + "language/" + idiom;
       },
 
-      /* component_directory is not necessary */
-      /* and the attribute is not used.... */
       _getRequestDataUrl: function(component_directory, access_token){
         /*return component_directory + "mockData/mockData.json";*/
-        return "https://graph.facebook.com/v2.3/me?fields=home&pretty=1&access_token=" + this.access_token;
+        return "https://graph.facebook.com/v2.3/me?fields=home&pretty=1&access_token=" + access_token;
       },
 
       _checkAccessToken: function(newValue) {
@@ -390,7 +388,7 @@ access_token={{access_token}}&summary=true -->
         }
       },
       /* Auxiliar function for parse data */
-      _checkElement(element, bool) {
+      _checkElement: function(element, bool) {
         // XNOR comparation for booleans
         return element.linked && ((element.linked.story && bool=='true') || (!element.linked.story && bool=='false'));
       },
@@ -410,7 +408,6 @@ access_token={{access_token}}&summary=true -->
         return url
       },
 
-      /* ¿¿Que narices hace?? */
       _getYoutubeVideo: function(url){
         return url.replace(/\?[=A-z0-9]*/, "");
       },
@@ -438,9 +435,8 @@ access_token={{access_token}}&summary=true -->
         return !item;
       },
 
-      /* Devuelve true/false solo? */
       _getShared: function(item){ 
-        return item.linked && item.linked.shares;
+        return (item.linked && item.linked.shares) ? true : false;
       },
       _getShareInformation: function(item) {
         tag = this._parserUser(item.from) + " " + item.story.replace(item.from.name+ " ", "");
@@ -466,7 +462,6 @@ access_token={{access_token}}&summary=true -->
         return "https://graph.facebook.com/" + item.linked.object_id + "/picture?access_token=" + this.access_token;
       },
 
-      /* No se usa esta funcion en ningún punto.... */
       _getWith: function(item) {
         var html = "";
         if (item && item.with_tags && item.with_tags.data.length > 0) {

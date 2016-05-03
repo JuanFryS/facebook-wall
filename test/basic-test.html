@@ -23,7 +23,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </head>
   <body>
 
-    <!-- You can use the document as a place to set up your fixtures. -->
     <test-fixture id='timeline'>
       <template>
         <facebook-wall language="en" access_token="123812341271321"></facebook-wall>
@@ -32,15 +31,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <script>
 
       describe('timeline component', function(){
-        myEl = fixture('timeline')
-        beforeEach(function(){
-          myEl.$.requestData.generateRequest = sinon.stub();
-          myEl.$.requestLanguage.generateRequest = sinon.stub();
-          myEl._changeTime = sinon.stub();
-        });
-        afterEach(function(){
-          sinon.restore()
-        });
 
         describe('attached function', function(){
           beforeEach(function(){
@@ -324,7 +314,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           });
         });
 
-        /* No coge el [1] del exec */
         describe('_getShareImg function', function(){
           beforeEach(function(){
             myEl = fixture('timeline');
@@ -334,16 +323,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             assert.isDefined(myEl._getShareImg)
             done();
           });
-          /* Analizar porque no funciona */
-          /*it('returns the parsed url', function(done){
+          it('returns the parsed url', function(done){
             var item = {
-              "picture" : "https://external.xx.fbcdn.net/safe_image.php?d=AQCHMlPkkPhoOHXp&w=130&h=130…ck.es%2Fuse%2Fup%2Fa3me%2F2016%2F04%2Fd_A3ME_1461659662_95374218.jpg&cfs=1"
+              "picture" : "https://external.xx.fbcdn.net/safe_image.php?d=AQDkrA_v07ivINkT&w=130&h=130&url=http%3A%2F%2Fcdn-jarvis-fun.9cache.com%2Fmedia%2Fphoto%2FpjQYJrdYW_1200w_v1.jpg&cfs=1&sx=0&sy=0&sw=630&sh=630"
             };
-            var check = "http://dogtrack.es/use/up/a3me/2016/04/d_A3ME_1461659662_95374218.jpg";
+            var check = "http://cdn-jarvis-fun.9cache.com/media/photo/pjQYJrdYW_1200w_v1.jpg";
             var result = myEl._getShareImg(item);
             assert.equal(result, check);
             done();
-          });*/
+          });
         });
 
         describe('_noExist function', function(){
@@ -369,7 +357,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           });
         });
 
-        /* Revisar el codigo... */
         describe('_getShared function', function(){
           beforeEach(function(){
             myEl = fixture('timeline');
@@ -388,16 +375,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               }
             };
             var result = myEl._getShared(item);
-            //assert.equal(result, true);
-            assert.isDefined(result)
+            assert.equal(result, true);
             done();
           });
           it('returns false when item does not have a linked or shared fields', function(done){
             var item = {
             };
             var result = myEl._getShared(item);
-            //assert.equal(result, false);
-            assert.isUndefined(result);
+            assert.equal(result, false);
             done();
           });
         });
@@ -567,7 +552,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           });
         });
 
-        /* No se usa en el componente */
         describe('_getWith function', function(){
           beforeEach(function(){
             myEl = fixture('timeline');
