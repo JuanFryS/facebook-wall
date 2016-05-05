@@ -1,4 +1,4 @@
-# Facebook wall
+# Facebook wall [![Build Status](https://travis-ci.org/JuanFryS/facebook-wall.svg?branch=master)](https://travis-ci.org/JuanFryS/facebook-wall)
 
 It is a [Polymer](https://www.polymer-project.org/1.0/) component which show a Facebook wall.
 
